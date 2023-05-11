@@ -91,7 +91,8 @@ def FundaGetListingInfo(browser: webdriver.Chrome, link):
         while j < len(kenmerkTags):
             tag = kenmerkTags[j]
             value = kenmerkValues[j+valueSkip]
-            if(not value.text): # Handle the damned additional lists like "Gebruiksoppervlakten" 
+
+            if("object-kenmerken-group-header" in tag.get_attribute("class")): # Handle the damned additional lists like "Gebruiksoppervlakten" 
                 valueSkip +=1
                 indentGroup = kenmerkValues[j+valueSkip]
                 
