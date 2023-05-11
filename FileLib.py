@@ -9,7 +9,7 @@ import sqlite3
 def WriteDataToJSON(outfile, data):
     EnsureFileExists(outfile)
     with open(outfile, 'w', encoding="utf8", newline="") as out:
-        json.dump(data, out) 
+        json.dump(data, out, indent=2, ensure_ascii=False) 
         
 def WriteDataToCSV(outfile, data):
     EnsureFileExists(outfile)

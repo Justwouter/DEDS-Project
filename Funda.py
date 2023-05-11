@@ -19,6 +19,7 @@ outputpath = os.path.dirname(__file__)+'/output/'
 outputfile = os.path.dirname(__file__)+'/output/bol.txt'
 pages = []
 adLinks = []
+listings = []
 wait = ""
 
         
@@ -73,8 +74,8 @@ def FundaGetListingInfo(browser: webdriver.Chrome, link):
     FundaRefuseCookie(browser,link)
     titel = browser.find_element(By.XPATH, "//span[@class = 'object-header__title']").text
     postCode = browser.find_element(By.XPATH, "//span[@class = 'object-header__subtitle fd-color-dark-3']").text
-    
-    kenmerken = {"titel":titel,"postCode":postCode,"url": link}
+    realtor = browser.find_element(By.XPATH, "//a[@class = 'object-contact-aanbieder-link']").text
+    kenmerken = {"titel":titel, "realtor":realtor,"postCode":postCode,"url": link}
     
     kenmerkenWindow = browser.find_element(By.XPATH, "//div[@class = 'object-kenmerken-body']")
     kenmerkHeaders = kenmerkenWindow.find_elements(By.XPATH, "//h3[@class = 'object-kenmerken-list-header']")
@@ -85,18 +86,45 @@ def FundaGetListingInfo(browser: webdriver.Chrome, link):
         kenmerkTags = element.find_elements(By.TAG_NAME, "dt")
         kenmerkValues = element.find_elements(By.TAG_NAME, "dd")
         output = {}
-        for j in range(len(kenmerkTags)):
-            output.update({kenmerkTags[j].text:kenmerkValues[j].text})
+        valueSkip = 0
+        j = 0
+        while j < len(kenmerkTags):
+            tag = kenmerkTags[j]
+            value = kenmerkValues[j+valueSkip]
+            if(not value.text): # Handle the damned additional lists like "Gebruiksoppervlakten" 
+                valueSkip +=1
+                indentGroup = kenmerkValues[j+valueSkip]
+                
+                indentTags = indentGroup.find_elements(By.TAG_NAME, "dt")
+                indentValues = indentGroup.find_elements(By.TAG_NAME, "dd")
+                
+                indentDict = {}
+                for count in range(len(indentTags)):
+                    j += 1
+                    iTag = indentTags[count]
+                    iValue = indentValues[count]
+                    indentDict.update({iTag.text:iValue.text})
+                output.update({tag.text:indentDict})
+            else:
+                output.update({tag.text:value.text})
+            j +=1
         kenmerken.update({kenmerkHeaders[i].text:output})
     return kenmerken
     
     
     
-    
+def getItemFromLock(lock: Lock, list):
+    lock.acquire()
+    data = list.pop()
+    lock.release()
+    return data
     
 lock = Lock()
 dataLock = Lock()
 fundaDataLock = Lock()
+
+
+
 class MyThread(Thread):
     
     def __init__(self, name):
@@ -108,23 +136,30 @@ class MyThread(Thread):
         browser = getBrowser()
 
         while len(pages) > 0:
-            lock.acquire()
-            pageNr = pages.pop()
-            lock.release()
+            pageNr = getItemFromLock(lock, pages)
             data = FundaGetLisitings(browser,baseURL+"/p"+str(pageNr))
+            
             dataLock.acquire()
             adLinks.extend(data)
             dataLock.release()
             
         while len(adLinks) > 0:
-            dataLock.acquire()
-            adURL = adLinks.pop()
-            dataLock.release()
-            listingInfo = FundaGetListingInfo(browser, adURL)
+            adURL = getItemFromLock(dataLock,adLinks)
+            try:
+                listingInfo = FundaGetListingInfo(browser, adURL)
+            except Exception as e:
+                print(e)
+                browser.close()
+                browser = getBrowser()
+                adLinks.append(adURL)
+                continue
+            
             
             fundaDataLock.acquire()
-            fl.WriteDataToJSON(r"D:\Coding\SE2\DEDS\DEDS-Project\fundaData.json",listingInfo)
+            listings.append(listingInfo)
+            fl.WriteDataToJSON(r"D:\Coding\SE2\DEDS\DEDS-Project\fundaData.json",listings)
             fundaDataLock.release()
+            
         browser.close()
 
 def create_threads():
@@ -142,10 +177,12 @@ def create_threads():
 if __name__ == "__main__":
     browser = getBrowser()
     wait = ui.WebDriverWait(browser, 5)
-    baseURL = FundaGetSearchURL(browser, "Den Haag")
-    pageAmount = FundaGetPageAmount(browser)
-    browser.close()
+    # baseURL = FundaGetSearchURL(browser, "Den Haag")
+    # pageAmount = FundaGetPageAmount(browser)
+    # browser.close()
     
-    for i in range(pageAmount):
-        pages.append(i)
-    create_threads()
+    fl.WriteDataToJSON(r"D:\Coding\SE2\DEDS\DEDS-Project\fundaData2.json",FundaGetListingInfo(browser, "https://www.funda.nl/koop/den-haag/huis-42101784-plesmanlaan-24/"))
+    
+    # for i in range(pageAmount):
+    #     pages.append(i)
+    # create_threads()
