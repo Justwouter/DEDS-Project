@@ -177,12 +177,12 @@ def create_threads():
 if __name__ == "__main__":
     browser = getBrowser()
     wait = ui.WebDriverWait(browser, 5)
-    # baseURL = FundaGetSearchURL(browser, "Den Haag")
-    # pageAmount = FundaGetPageAmount(browser)
-    # browser.close()
+    #Testing
+    # fl.WriteDataToJSON(r"D:\Coding\SE2\DEDS\DEDS-Project\fundaData2.json",FundaGetListingInfo(browser, "https://www.funda.nl/koop/den-haag/huis-42101784-plesmanlaan-24/"))
     
-    fl.WriteDataToJSON(r"D:\Coding\SE2\DEDS\DEDS-Project\fundaData2.json",FundaGetListingInfo(browser, "https://www.funda.nl/koop/den-haag/huis-42101784-plesmanlaan-24/"))
-    
-    # for i in range(pageAmount):
-    #     pages.append(i)
-    # create_threads()
+    baseURL = FundaGetSearchURL(browser, "Den Haag")
+    pageAmount = FundaGetPageAmount(browser)
+    browser.close()
+    for i in range(pageAmount):
+        pages.append(i)
+    create_threads()
