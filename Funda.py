@@ -21,11 +21,6 @@ pages = []
 adLinks = []
 wait = ""
 
-
-
-def writeToOutput(item):
-    with open(outputfile, 'a', encoding="utf8", newline="") as out:
-        out.write(item+"\n")
         
 def getBrowser():
     webdriver.Chrome.get
@@ -51,9 +46,8 @@ def FundaRefuseCookie(browser: webdriver.Chrome, link):
         browser.find_element(By.ID, "onetrust-accept-btn-handler").click()
     except:
         return 0
-      
-        
-def FundaGetInfo(browser: webdriver.Chrome, link):
+         
+def FundaGetLisitings(browser: webdriver.Chrome, link):
     FundaRefuseCookie(browser,link)
     Advertenties = browser.find_elements(By.CLASS_NAME, 'search-result__header-title-col')
     print(len(Advertenties))
@@ -74,10 +68,36 @@ def FundaGetPageAmount(browser: webdriver.Chrome):
     print(pageAmount)
     return pageAmount
         
+        
+        
+def FundaGetListingInfo(browser: webdriver.Chrome, link):
+    FundaRefuseCookie(browser,link)
+    titel = browser.find_element(By.XPATH, "//span[@class = 'object-header__title']").text
+    postCode = browser.find_element(By.XPATH, "//span[@class = 'object-header__subtitle fd-color-dark-3']").text
+    
+    kenmerken = {"titel":titel,"postCode":postCode,"url": link}
+    
+    kenmerkenWindow = browser.find_element(By.XPATH, "//div[@class = 'object-kenmerken-body']")
+    kenmerkHeaders = kenmerkenWindow.find_elements(By.XPATH, "//h3[@class = 'object-kenmerken-list-header']")
+    kenmerkenLists = kenmerkenWindow.find_elements(By.XPATH, "//dl[@class = 'object-kenmerken-list']")
+    
+    for i in range(len(kenmerkHeaders)):
+        element = kenmerkenLists[i]
+        kenmerkTags = element.find_elements(By.TAG_NAME, "dt")
+        kenmerkValues = element.find_elements(By.TAG_NAME, "dd")
+        output = {}
+        for j in range(len(kenmerkTags)):
+            output.update({kenmerkTags[j].text:kenmerkValues[j].text})
+        kenmerken.update({kenmerkHeaders[i].text:output})
+    return kenmerken
+    
+    
+    
     
     
 lock = Lock()
-fileLock = Lock()
+dataLock = Lock()
+fundaDataLock = Lock()
 class MyThread(Thread):
     
     def __init__(self, name):
@@ -89,16 +109,24 @@ class MyThread(Thread):
         browser = getBrowser()
 
         while len(pages) > 0:
-            
             lock.acquire()
             pageNr = pages.pop()
             lock.release()
-            data = FundaGetInfo(browser,baseURL+"/p"+str(pageNr))
-            fileLock.acquire()
-            adLinks.append(data)
-            fl.WriteDataToJSON(r"D:\Coding\SE2\DEDS\DEDS-Project\data.json",adLinks)
-            fileLock.release()
+            data = FundaGetLisitings(browser,baseURL+"/p"+str(pageNr))
             
+            dataLock.acquire()
+            adLinks.append(data)
+            dataLock.release()
+            
+        while len(adLinks) > 0:
+            dataLock.acquire()
+            adURL = adLinks.pop()
+            dataLock.release()
+            listingInfo = FundaGetListingInfo(browser, adURL)
+            
+            fundaDataLock.acquire()
+            fl.WriteDataToJSON(r"D:\Coding\SE2\DEDS\DEDS-Project\fundaData.json",listingInfo)
+            fundaDataLock.release()
         browser.close()
 
 def create_threads():
@@ -119,6 +147,7 @@ if __name__ == "__main__":
     baseURL = FundaGetSearchURL(browser, "Den Haag")
     pageAmount = FundaGetPageAmount(browser)
     browser.close()
+    
     for i in range(pageAmount):
         pages.append(i)
     create_threads()
