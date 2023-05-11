@@ -39,7 +39,7 @@ def getBrowser():
     caps["pageLoadStrategy"] = "normal"
     return uc.Chrome(desired_capabilities=caps, chrome_options=options)    
 
-def FundaRefuseCookie(browser: webdriver.Chrome, link):
+def FundaRefuseCookie(browser: webdriver.Chrome, link:str):
     browser.get(link)
     try:
         wait.until(lambda Waitlol: browser.find_element(By.ID, 'onetrust-accept-btn-handler'))
@@ -65,7 +65,6 @@ def FundaGetSearchURL(browser: webdriver.Chrome,searchterm):
 def FundaGetPageAmount(browser: webdriver.Chrome):
     pageBar = browser.find_element(By.XPATH , "//nav[@class = 'pagination']")
     pageAmount = int(pageBar.find_elements(By.TAG_NAME, "a")[-2].get_attribute("data-pagination-page"))
-    print(pageAmount)
     return pageAmount
         
         
@@ -113,9 +112,8 @@ class MyThread(Thread):
             pageNr = pages.pop()
             lock.release()
             data = FundaGetLisitings(browser,baseURL+"/p"+str(pageNr))
-            
             dataLock.acquire()
-            adLinks.append(data)
+            adLinks.extend(data)
             dataLock.release()
             
         while len(adLinks) > 0:
