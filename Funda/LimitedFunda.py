@@ -17,8 +17,8 @@ adLinks = []
 listings = []
 wait = ""
 
-#TODO 
-#Actually implement project dir saving without hardcoded paths
+#TODO
+# Add error counter to url's to avoid looping
         
 def getBrowser():
     #Setup driver
@@ -41,8 +41,7 @@ def getBrowser():
     caps["pageLoadStrategy"] = "normal"
     
     
-    return uc.Chrome(desired_capabilities=caps, chrome_options=options)    
-
+    return uc.Chrome(desired_capabilities=caps, chrome_options=options)
 
 def FundaRefuseCookie(browser: webdriver.Chrome, link:str):
     browser.get(link)
@@ -72,10 +71,9 @@ def FundaGetPageAmount(browser: webdriver.Chrome):
     pageAmount = int(pageBar.find_elements(By.TAG_NAME, "a")[-2].get_attribute("data-pagination-page"))
     return pageAmount
         
-        
-        
+          
 def FundaGetListingInfo(browser: webdriver.Chrome, link):
-    #I don't want to talk about it -_-..
+    #I don't want to talk about it.. -_-
     
     FundaRefuseCookie(browser,link)
     titel = browser.find_element(By.XPATH, "//span[@class = 'object-header__title']").text
@@ -87,43 +85,13 @@ def FundaGetListingInfo(browser: webdriver.Chrome, link):
     kenmerkHeaders = kenmerkenWindow.find_elements(By.XPATH, "//h3[@class = 'object-kenmerken-list-header']")
     kenmerkenLists = kenmerkenWindow.find_elements(By.XPATH, "//dl[@class = 'object-kenmerken-list']")
     
-    for i in range(len(kenmerkHeaders)):
-        element = kenmerkenLists[i]
-        kenmerkTags = element.find_elements(By.TAG_NAME, "dt")
-        kenmerkValues = element.find_elements(By.TAG_NAME, "dd")
-        output = {}
-        valueSkip = 0
-        j = 0
-        while j < len(kenmerkTags):
-            tag = kenmerkTags[j]
-            value = kenmerkValues[j+valueSkip]
-
-            if("object-kenmerken-group-header" in tag.get_attribute("class")): # Handle the damned additional lists like "Gebruiksoppervlakten" 
-                valueSkip +=1
-                indentGroup = kenmerkValues[j+valueSkip]
-                
-                indentTags = indentGroup.find_elements(By.TAG_NAME, "dt")
-                indentValues = indentGroup.find_elements(By.TAG_NAME, "dd")
-                
-                indentDict = {}
-                for count in range(len(indentTags)):
-                    j += 1
-                    
-                    iTag = indentTags[count]
-                    iValue = indentValues[count]
-                    indentDict.update({iTag.text:iValue.text})
-                    
-                output.update({tag.text:indentDict})
-            else:
-                output.update({tag.text:value.text})
-            j +=1
+   
             
-        kenmerken.update({kenmerkHeaders[i].text:output})
+    kenmerken.update({kenmerkHeaders[i].text:output})
         
     return kenmerken
     
-    
-    
+
 def getItemFromLock(lock: Lock, list):
     lock.acquire()
     data = list.pop()
@@ -133,7 +101,6 @@ def getItemFromLock(lock: Lock, list):
 lock = Lock()
 dataLock = Lock()
 fundaDataLock = Lock()
-
 
 
 class MyThread(Thread):
@@ -172,7 +139,7 @@ class MyThread(Thread):
             
             fundaDataLock.acquire()
             listings.append(listingInfo)
-            fl.WriteDataToJSON(outputpath+r"\fundaData.json",listings)
+            fl.WriteDataToJSON(outputpath+r"\fundaSmallData.json",listings)
             fundaDataLock.release()
             print(threadName +" finished "+adURL)
 
