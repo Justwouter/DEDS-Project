@@ -1,11 +1,7 @@
-import csv
 import os
 from threading import Thread, Lock
 import time
-from csv import writer
 import warnings
-from bs4 import BeautifulSoup
-import requests
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options 
 from selenium.webdriver.common.by import By
@@ -16,7 +12,6 @@ import FileLib as fl
 
 url = "https://funda.nl"
 outputpath = os.path.dirname(__file__)+'/output/'
-outputfile = os.path.dirname(__file__)+'/output/bol.txt'
 pages = []
 adLinks = []
 listings = []
@@ -26,9 +21,11 @@ wait = ""
 #Actually implement project dir saving without hardcoded paths
         
 def getBrowser():
+    #Setup driver
     webdriver.Chrome.get
-    startTime = time.time()
     warnings.filterwarnings("ignore", category=DeprecationWarning)
+    
+    #Configure additional options e.g. headless mode
     options = webdriver.ChromeOptions()
     # options.add_argument("--log-level=3")
     # options.add_experimental_option('excludeSwitches', ['enable-logging'])
@@ -38,9 +35,14 @@ def getBrowser():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--start-maximized")
+    
+    #Configure browser behavior
     caps = DesiredCapabilities().CHROME
     caps["pageLoadStrategy"] = "normal"
+    
+    
     return uc.Chrome(desired_capabilities=caps, chrome_options=options)    
+
 
 def FundaRefuseCookie(browser: webdriver.Chrome, link:str):
     browser.get(link)
@@ -73,6 +75,8 @@ def FundaGetPageAmount(browser: webdriver.Chrome):
         
         
 def FundaGetListingInfo(browser: webdriver.Chrome, link):
+    #I don't want to talk about it -_-..
+    
     FundaRefuseCookie(browser,link)
     titel = browser.find_element(By.XPATH, "//span[@class = 'object-header__title']").text
     postCode = browser.find_element(By.XPATH, "//span[@class = 'object-header__subtitle fd-color-dark-3']").text
@@ -104,14 +108,18 @@ def FundaGetListingInfo(browser: webdriver.Chrome, link):
                 indentDict = {}
                 for count in range(len(indentTags)):
                     j += 1
+                    
                     iTag = indentTags[count]
                     iValue = indentValues[count]
                     indentDict.update({iTag.text:iValue.text})
+                    
                 output.update({tag.text:indentDict})
             else:
                 output.update({tag.text:value.text})
             j +=1
+            
         kenmerken.update({kenmerkHeaders[i].text:output})
+        
     return kenmerken
     
     
@@ -145,6 +153,7 @@ class MyThread(Thread):
             dataLock.acquire()
             adLinks.extend(data)
             dataLock.release()
+            print(threadName +" finished "+pageNr)
             
         while len(adLinks) > 0:
             adURL = getItemFromLock(dataLock,adLinks)
@@ -163,8 +172,10 @@ class MyThread(Thread):
             
             fundaDataLock.acquire()
             listings.append(listingInfo)
-            fl.WriteDataToJSON(r"D:\Coding\SE2\DEDS\DEDS-Project\fundaData.json",listings)
+            fl.WriteDataToJSON(outputpath+r"\fundaData.json",listings)
             fundaDataLock.release()
+            print(threadName +" finished "+adURL)
+
             
         browser.close()
 
