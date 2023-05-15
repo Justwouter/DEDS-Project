@@ -3,7 +3,6 @@ from threading import Thread, Lock
 import time
 import warnings
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options 
 from selenium.webdriver.common.by import By
 import selenium.webdriver.support.ui as ui
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
@@ -29,7 +28,7 @@ def getBrowser():
     options = webdriver.ChromeOptions()
     # options.add_argument("--log-level=3")
     # options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
     options.add_argument("--disable-gpu")
     options.add_argument("enable-automation")
     options.add_argument("--no-sandbox")
@@ -149,7 +148,7 @@ class MyThread(Thread):
             dataLock.acquire()
             adLinks.extend(data)
             dataLock.release()
-            print(threadName +" finished "+pageNr)
+            print(threadName +" finished "+str(pageNr))
             
         while len(adLinks) > 0:
             adURL = getItemFromLock(dataLock,adLinks)
@@ -183,8 +182,7 @@ def create_threads():
         my_thread.start()
     my_thread.join() 
     end_time = time.time()
-    execution_time = end_time - start_time
-    print("Execution time:", execution_time, "seconds")
+    print("Execution time:", (end_time - start_time), "seconds")
     time.sleep(5)
     
 if __name__ == "__main__":
