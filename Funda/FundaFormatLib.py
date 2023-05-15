@@ -10,12 +10,16 @@ def parseFundaData(inputFile: str, outputFile: str):
     outputArray = []
     for entry in inputDict:
         outputDict = {}
-        outputDict.update({"postCode":entry["postCode"]})
+        outputDict.update({"postCode":entry["postCode"].split(" ")})
         outputDict.update({"url":entry["url"]})
+        outputDict.update({"inhoudInM2":float(entry["Oppervlakten en inhoud"]["Inhoud"].replace(" mÂ³",""))})
+        # outputDict.update({"bouwJaar":int(entry["Bouw"]["Bouwjaar"].replace("Voor ",""))})
+        outputDict.update({"energieLabel":entry["Energie"]["Energielabel"].replace(" ","")})
+
+        
         outputArray.append(outputDict)
     fl.WriteDataToJSON(outputFile,outputArray)
-    fl.WriteDataToCSV(outputFile,outputpath+"/")
         
-    
+
     
 parseFundaData(outputpath+"/fundaData.json", outputpath+"/fundaDataPARSED.json")

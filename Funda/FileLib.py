@@ -60,3 +60,16 @@ def saveDictToSQLITE(database, table, data):
     # commit the changes and close the connection
     conn.commit()
     conn.close()
+    
+    
+def find_first_difference(str1, str2):
+    min_length = min(len(str1), len(str2))
+    for i in range(min_length):
+        if str1[i] != str2[i]:
+            start = max(0, i - 6)
+            end = min(min_length, i + 7)
+            differing_chars = str1[start:i] + " <" + str1[i] + "> " + str1[i+1:end]
+            print(f"The strings first differ at index {i}.")
+            print(f"Surrounding characters: {differing_chars}")
+            return i
+    return min_length
