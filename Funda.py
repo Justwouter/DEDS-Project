@@ -1,11 +1,7 @@
-import csv
 import os
 from threading import Thread, Lock
 import time
-from csv import writer
 import warnings
-from bs4 import BeautifulSoup
-import requests
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options 
 from selenium.webdriver.common.by import By
@@ -16,7 +12,6 @@ import FileLib as fl
 
 url = "https://funda.nl"
 outputpath = os.path.dirname(__file__)+'/output/'
-outputfile = os.path.dirname(__file__)+'/output/bol.txt'
 pages = []
 adLinks = []
 listings = []
@@ -158,7 +153,7 @@ class MyThread(Thread):
             
             fundaDataLock.acquire()
             listings.append(listingInfo)
-            fl.WriteDataToJSON(r"D:\Coding\SE2\DEDS\DEDS-Project\fundaData.json",listings)
+            fl.WriteDataToJSON(outputpath+r"\fundaData.json",listings)
             fundaDataLock.release()
             
         browser.close()
