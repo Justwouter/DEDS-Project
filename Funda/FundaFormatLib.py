@@ -29,11 +29,12 @@ def parseFundaData(inputFile: str, outputFile: str):
     fl.WriteDataToJSON(outputFile,outputArray)
     return outputArray
 
-def removeStupidKeys(inputFile: str, outputFile: str):
+def removeStupidKeys(inputFile: str, outputFile: str): #Removes dynamically changing keys from the dataset to avoid clutter in the DB. Also adds id's for good measure
     with open(inputFile, encoding="utf8") as input:
         input = json.load(input)
     for entry in input:
         entry.pop("Kadastrale gegevens", None)
+        entry.update({"_id":int(entry["url"].split("/")[5].split("-")[1])})
         
     fl.WriteDataToJSON(outputFile,input)
     return input
@@ -64,11 +65,15 @@ def handleTypes(value):
         return str(value.replace(" m²","").replace(" m³","").split(" ")[0])
     return None
     
-fl.saveDictToMongo("FundaDB","FundaDataParsed",parseFundaData(outputpath+"/fundaData.json", outputpath+"/fundaDataPARSED.json"))
+    
+    
+parseFundaData(outputpath+"/fundaData.json", outputpath+"/fundaDataPARSED.json")
+fl.saveDictListToMongo("FundaDB","FundaDataParsed",parseFundaData(outputpath+"/fundaData.json", outputpath+"/fundaDataPARSED.json"))
 
 removeStupidKeys(outputpath+"/fundaData.json", outputpath+"/fundaDataCleaned.json")
 with open(outputpath+"/fundaDataCleaned.json", encoding="utf8") as input:
     squashedList = []
-    for entry in json.load(input):
+    data = json.load(input)
+    for entry in data:
         squashedList.append(fl.squashDict(entry))
-    fl.saveDictToMongo("FundaDB","FundaDataRaw",squashedList)
+    fl.saveDictListToMongo("FundaDB","FundaDataRaw",squashedList)

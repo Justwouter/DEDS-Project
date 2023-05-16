@@ -69,7 +69,7 @@ mongoUser = "Wouter"
 mongoPass = "String1!"
 
     
-def saveDictToMongo(database, collection, dataDict):
+def saveDictListToMongo(database, collection, dataDict):
     client = MongoClient('mongodb://'+mongoUser+":"+mongoPass+"@"+mongoURL)
     
     db = client[database]
@@ -79,10 +79,12 @@ def saveDictToMongo(database, collection, dataDict):
     
     #Update records if Id is already present
     for data in dataDict:
-        doc_id = data.pop('_id', None)
-        if doc_id:
-            collection.update_one({'_id': doc_id}, {'$set': data})
+        id = data.pop('_id', None)
+        if id in collection.distinct('_id'):
+            collection.update_one({'_id': id}, {'$set': data})
         else:
+            if id is not None:
+                data['_id'] = id
             collection.insert_one(data)
 
     client.close()
