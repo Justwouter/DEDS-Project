@@ -3,6 +3,7 @@ import os
 import json
 import pyodbc
 import sqlite3
+from pymongo import MongoClient
 
 
 
@@ -62,7 +63,44 @@ def saveDictToSQLITE(database, table, data):
     conn.close()
     
     
-def find_first_difference(str1, str2):
+    
+mongoURL = "213.184.119.120:27017"
+mongoUser = "Wouter"
+mongoPass = "String1!"
+
+    
+def saveDictToMongo(database, collection, dataDict):
+    client = MongoClient('mongodb://'+mongoUser+":"+mongoPass+"@"+mongoURL)
+    
+    db = client[database]
+    if collection not in db.list_collection_names():
+        db.create_collection(collection)
+    collection = db[collection]
+    
+    #Update records if Id is already present
+    for data in dataDict:
+        doc_id = data.pop('_id', None)
+        if doc_id:
+            collection.update_one({'_id': doc_id}, {'$set': data})
+        else:
+            collection.insert_one(data)
+
+    client.close()
+    
+    
+
+    
+def squashDict(nested_dict, parent_key='', sep='_'):
+    flattened_dict = {}
+    for key, value in nested_dict.items():
+        new_key = f"{parent_key}{sep}{key}" if parent_key else key
+        if isinstance(value, dict):
+            flattened_dict.update(squashDict(value, new_key, sep))
+        else:
+            flattened_dict[new_key] = value
+    return flattened_dict
+
+def findDiffrenceInStrings(str1, str2):
     min_length = min(len(str1), len(str2))
     for i in range(min_length):
         if str1[i] != str2[i]:
