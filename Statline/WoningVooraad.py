@@ -48,4 +48,3 @@ def main(url):
     
 
 main(urlDHTypeByYear)
-fl.WriteDataToJSON("./cbs.json", getData(urlDHTypeByYear))
