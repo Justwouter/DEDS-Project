@@ -4,6 +4,8 @@ import time
 from threading import Thread, Lock
 import csv
 
+#ChatGPT's improved version of Quinten.py
+
 counter = 0
 newPage = False
 page = 1
