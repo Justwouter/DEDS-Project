@@ -28,7 +28,18 @@ def parseFundaData(inputFile: str, outputFile: str):
         if outputDict not in outputArray: outputArray.append(outputDict)
     fl.WriteDataToJSON(outputFile,outputArray)
     return outputArray
-   
+
+def removeStupidKeys(inputFile: str, outputFile: str):
+    with open(inputFile, encoding="utf8") as input:
+        input = json.load(input)
+    for entry in input:
+        entry.pop("Kadastrale gegevens", None)
+        
+    fl.WriteDataToJSON(outputFile,input)
+    return input
+
+
+
 def getKeyOrNone(dictionary, key):
     keys = key.split(".")
     value = dictionary
@@ -55,5 +66,9 @@ def handleTypes(value):
     
 fl.saveDictToMongo("FundaDB","FundaDataParsed",parseFundaData(outputpath+"/fundaData.json", outputpath+"/fundaDataPARSED.json"))
 
-with open(outputpath+"/fundaData.json", encoding="utf8") as input:
-    fl.saveDictToMongo("FundaDB","FundaDataRaw",fl.squashDict(json.load(input)))
+removeStupidKeys(outputpath+"/fundaData.json", outputpath+"/fundaDataCleaned.json")
+with open(outputpath+"/fundaDataCleaned.json", encoding="utf8") as input:
+    squashedList = []
+    for entry in json.load(input):
+        squashedList.append(fl.squashDict(entry))
+    fl.saveDictToMongo("FundaDB","FundaDataRaw",squashedList)
