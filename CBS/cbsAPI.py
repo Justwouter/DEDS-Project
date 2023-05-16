@@ -7,7 +7,6 @@ outputpath = os.path.dirname(__file__)+'/output/'
 
 # Url voor woningen in DH per jaar per type
 urlDHTypeByYear = r"https://opendata.cbs.nl/ODataApi/odata/83704NED/UntypedDataSet?$filter=((Woningtype eq 'T001100') or (Woningtype eq 'ZW10290') or (Woningtype eq 'ZW10340')) and ((Oppervlakteklasse eq 'T001116') or (Oppervlakteklasse eq 'A041692') or (Oppervlakteklasse eq 'A025407') or (Oppervlakteklasse eq 'A025408') or (Oppervlakteklasse eq 'A025409') or (Oppervlakteklasse eq 'A025410') or (Oppervlakteklasse eq 'A025411') or (Oppervlakteklasse eq 'A025412') or (Oppervlakteklasse eq 'A041691')) and ((RegioS eq 'GM0518'))&$select=Woningtype, Oppervlakteklasse, Perioden, RegioS, BeginstandWoningvoorraad_1"
-baseurl = "https://opendata.cbs.nl/ODataApi/odata/83704NED"
 # https://opendata.cbs.nl/#/CBS/nl/dataset/83704NED/table?searchKeywords=voorraad%20woningen <-- Use this to generate query strings
 def getData(url):
     request = requests.get(url)
@@ -44,11 +43,11 @@ def main(url):
         if  "DataSet" not in dataName:
             data = getData(item["url"])
             fl.WriteDataToJSON(saveFolder+dataName+".json", data)
-            fl.saveDictListToMongo("CBS_WoningVooraad",dataName,data["value"])
+            fl.saveDictListToMongo("CBS_WoningVoorraad",dataName,data["value"])
         else:
             data = getData(CBSreplaceDatasetName(url, dataName))
             fl.WriteDataToJSON(saveFolder+dataName+".json", data)
-            fl.saveDictListToMongo("CBS_WoningVooraad",dataName,data["value"])
+            fl.saveDictListToMongo("CBS_WoningVoorraad",dataName,data["value"])
         print("Saved "+ dataName)
 
 main(urlDHTypeByYear)
