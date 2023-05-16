@@ -6,9 +6,9 @@ import FileLib as fl
 outputpath = os.path.dirname(__file__)+'/output/'
 
 # Url voor woningen in DH per jaar per type
-urlDHTypeByYear = r"https://opendata.cbs.nl/ODataApi/odata/83704NED/TypedDataSet?$filter=((Woningtype+eq+%27T001100%27)+or+(Woningtype+eq+%27ZW10290%27)+or+(Woningtype+eq+%27ZW10340%27))+and+((Oppervlakteklasse+eq+%27T001116%27))+and+((RegioS+eq+%27GM0518%27))&$select=Woningtype,+Oppervlakteklasse,+Perioden,+RegioS,+BeginstandWoningvoorraad_1"
+urlDHTypeByYear = r"https://opendata.cbs.nl/ODataApi/odata/83704NED/UntypedDataSet?$filter=((Woningtype eq 'T001100') or (Woningtype eq 'ZW10290') or (Woningtype eq 'ZW10340')) and ((Oppervlakteklasse eq 'T001116') or (Oppervlakteklasse eq 'A041692') or (Oppervlakteklasse eq 'A025407') or (Oppervlakteklasse eq 'A025408') or (Oppervlakteklasse eq 'A025409') or (Oppervlakteklasse eq 'A025410') or (Oppervlakteklasse eq 'A025411') or (Oppervlakteklasse eq 'A025412') or (Oppervlakteklasse eq 'A041691')) and ((RegioS eq 'GM0518'))&$select=Woningtype, Oppervlakteklasse, Perioden, RegioS, BeginstandWoningvoorraad_1"
 baseurl = "https://opendata.cbs.nl/ODataApi/odata/83704NED"
-
+# https://opendata.cbs.nl/#/CBS/nl/dataset/83704NED/table?searchKeywords=voorraad%20woningen <-- Use this to generate query strings
 def getData(url):
     request = requests.get(url)
     if(request.ok):
@@ -40,6 +40,7 @@ def main(url):
     
     for item in index["value"]:
         dataName = CBSgetDatasetName(item["url"])
+        print("Starting "+dataName)
         if  "DataSet" not in dataName:
             data = getData(item["url"])
             fl.WriteDataToJSON(saveFolder+dataName+".json", data)
