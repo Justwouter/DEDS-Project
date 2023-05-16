@@ -16,8 +16,6 @@ adLinks = []
 listings = []
 wait = ""
 
-ad = 'Sponsored by Raid Shadow Legends'
-
 #TODO
 # Add error counter to url's to avoid looping
         
@@ -56,7 +54,6 @@ def FundaGetLisitings(browser: webdriver.Chrome, link):
     FundaRefuseCookie(browser,link)
     Advertenties = browser.find_elements(By.CLASS_NAME, 'search-result__header-title-col')
     print(len(Advertenties))
-    print(ad)
     adLinks = []
     for element in Advertenties:
         adLinks.append(element.find_elements(By.TAG_NAME, "a")[1].get_attribute("href"))
