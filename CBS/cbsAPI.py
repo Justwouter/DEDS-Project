@@ -5,9 +5,6 @@ import FileLib as fl
 
 outputpath = os.path.dirname(__file__)+'/output/'
 
-# Url voor woningen in DH per jaar per type
-urlDHTypeByYear = r"https://opendata.cbs.nl/ODataApi/odata/82235NED/"
-# https://opendata.cbs.nl/#/CBS/nl/dataset/83704NED/table?searchKeywords=voorraad%20woningen <-- Use this to generate query strings
 def getData(url):
     request = requests.get(url)
     if(request.ok):
@@ -29,11 +26,20 @@ def CBSreplaceDatasetName(url, name):
         query = ""
     return baseurl+str(name)+query
 
+def CBSrewriteID(data):
+    for entry in data["value"]:
+        if "Key" in entry:
+            entry.update({"_id":entry.pop("Key")})
+        elif "ID" in entry:
+            entry.update({"_id":entry.pop("ID")})
+    return data
+        
+        
+    
 
 
 
-
-def main(url):
+def main(url, dbName):
     baseurl = CBSgetBaseURL(url)
     dataCode = CBSgetDatasetCode(baseurl)
     saveFolder = outputpath+dataCode+"/"
@@ -45,13 +51,27 @@ def main(url):
         dataName = CBSgetDatasetName(item["url"])
         print("Starting "+dataName)
         if  "DataSet" not in dataName:
-            data = getData(item["url"])
+            data = CBSrewriteID(getData(item["url"]))
             fl.WriteDataToJSON(saveFolder+dataName+".json", data)
-            fl.saveDictListToMongo("CBS_"+dataCode,dataName,data["value"])
+            fl.saveDictListToMongo(dbName,dataName,data["value"])
         else:
-            data = getData(CBSreplaceDatasetName(url, dataName))
+            data = CBSrewriteID(getData(CBSreplaceDatasetName(url, dataName)))
             fl.WriteDataToJSON(saveFolder+dataName+".json", data)
-            fl.saveDictListToMongo("CBS_"+dataCode,dataName,data["value"])
+            fl.saveDictListToMongo(dbName,dataName,data["value"])
         print("Saved "+ dataName)
 
-main(urlDHTypeByYear)
+
+
+CBSlinks = [
+    [r"https://opendata.cbs.nl/ODataApi/odata/82235NED/","CBS_WoningVoorraad_Standen-mutaties_82235NED"],
+    [r"https://opendata.cbs.nl/ODataApi/odata/83625NED/UntypedDataSet?$filter=((Perioden+eq+%271995JJ00%27)+or+(Perioden+eq+%272000JJ00%27)+or+(Perioden+eq+%272005JJ00%27)+or+(Perioden+eq+%272010JJ00%27)+or+(Perioden+eq+%272015JJ00%27)+or+(Perioden+eq+%272020JJ00%27)+or+(Perioden+eq+%272021JJ00%27)+or+(Perioden+eq+%272022JJ00%27))+and+((RegioS+eq+%27GM0518%27))&$select=Perioden,+RegioS,+GemiddeldeVerkoopprijs_1",
+     "CBS_Bestaande_Koopwoningen_83625NED"],
+    [r"https://opendata.cbs.nl/ODataApi/odata/83704NED/UntypedDataSet?$filter=((Woningtype eq 'T001100') or (Woningtype eq 'ZW10290') or (Woningtype eq 'ZW10340')) and ((Oppervlakteklasse eq 'T001116') or (Oppervlakteklasse eq 'A041692') or (Oppervlakteklasse eq 'A025407') or (Oppervlakteklasse eq 'A025408') or (Oppervlakteklasse eq 'A025409') or (Oppervlakteklasse eq 'A025410') or (Oppervlakteklasse eq 'A025411') or (Oppervlakteklasse eq 'A025412') or (Oppervlakteklasse eq 'A041691')) and ((RegioS eq 'GM0518'))&$select=Woningtype, Oppervlakteklasse, Perioden, RegioS, BeginstandWoningvoorraad_1",
+     "CBS_WoningVoorraad_type-regio-klasse_83704NED"],
+    [r"https://opendata.cbs.nl/ODataApi/odata/82900NED/UntypedDataSet?$filter=((StatusVanBewoning+eq+%27T001235%27)+or+(StatusVanBewoning+eq+%27A028725%27)+or+(StatusVanBewoning+eq+%27A028726%27))+and+((RegioS+eq+%27GM0518%27))&$select=StatusVanBewoning,+Perioden,+RegioS,+TotaleWoningvoorraad_1,+Koopwoningen_2,+TotaalHuurwoningen_3,+EigendomWoningcorporatie_4,+EigendomOverigeVerhuurders_5,+EigendomOnbekend_6",
+     "CBS_WoningVoorraad_eigendom-bewoning-regio_82900NED"]
+]
+
+for item in CBSlinks:
+    main(item[0],item[1])
+
