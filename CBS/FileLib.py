@@ -89,9 +89,7 @@ def saveDictListToMongo(database, collection, dataDict):
 
     client.close()
     
-    
-
-    
+#Somewhat unrelated usefull functions
 def squashDict(nested_dict, parent_key='', sep='_'):
     flattened_dict = {}
     for key, value in nested_dict.items():
