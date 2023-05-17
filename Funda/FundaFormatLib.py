@@ -76,9 +76,9 @@ parseFundaData(outputpath+"/fundaData.json", outputpath+"/fundaDataPARSED.json")
 fl.saveDictListToMongo("FundaDB","FundaDataParsed",parseFundaData(outputpath+"/fundaData.json", outputpath+"/fundaDataPARSED.json"))
 
 removeStupidKeys(outputpath+"/fundaData.json", outputpath+"/fundaDataCleaned.json")
-# with open(outputpath+"/fundaDataCleaned.json", encoding="utf8") as input:
-#     squashedList = []
-#     data = json.load(input)
-#     for entry in data:
-#         squashedList.append(fl.squashDict(entry))
-#     fl.saveDictListToMongo("FundaDB","FundaDataRaw",squashedList)
+with open(outputpath+"/fundaDataCleaned.json", encoding="utf8") as input:
+    squashedList = []
+    data = json.load(input)
+    for entry in data:
+        squashedList.append(fl.squashDict(entry))
+    fl.saveDictListToMongo("FundaDB","FundaDataRaw",squashedList)
