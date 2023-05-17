@@ -32,10 +32,11 @@ def CBSreplaceDatasetName(url, name):
 
 def main(url):
     baseurl = CBSgetBaseURL(url)
-    saveFolder = outputpath+CBSgetDatasetCode(baseurl)+"/"
+    dataCode = CBSgetDatasetCode(baseurl)
+    saveFolder = outputpath+dataCode+"/"
     index = getData(baseurl)
     
-    fl.WriteDataToJSON(saveFolder+"cbs"+CBSgetDatasetCode(baseurl)+".json",index)
+    fl.WriteDataToJSON(saveFolder+"cbs"+dataCode+".json",index)
     
     for item in index["value"]:
         dataName = CBSgetDatasetName(item["url"])
@@ -43,11 +44,11 @@ def main(url):
         if  "DataSet" not in dataName:
             data = getData(item["url"])
             fl.WriteDataToJSON(saveFolder+dataName+".json", data)
-            fl.saveDictListToMongo("CBS_WoningVoorraad",dataName,data["value"])
+            fl.saveDictListToMongo("CBS_"+dataCode,dataName,data["value"])
         else:
             data = getData(CBSreplaceDatasetName(url, dataName))
             fl.WriteDataToJSON(saveFolder+dataName+".json", data)
-            fl.saveDictListToMongo("CBS_WoningVoorraad",dataName,data["value"])
+            fl.saveDictListToMongo("CBS_"+dataCode,dataName,data["value"])
         print("Saved "+ dataName)
 
 main(urlDHTypeByYear)
