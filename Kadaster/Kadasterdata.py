@@ -16,14 +16,15 @@ def KDgetDataByPostCode(postCode):
 
 # data = KDgetDataByPostCode("2498cg")["response"]["docs"]
 # fl.WriteDataToJSON(outputpath+"kadasterData.json",data)
-output = {}
-with open(inputpath+"data.json","r") as inputFile:
-    inputData = json.load(inputFile)
-    for huis in inputData:
-        postcode = huis["postCode"]
-        print(postcode)
-        outData = KDgetDataByPostCode(postcode)["response"]["docs"]
-        output[postcode] = outData
+def KDgetData():
+    output = {}
+    with open(inputpath+"data.json","r") as inputFile:
+        inputData = json.load(inputFile)
+        for huis in inputData:
+            postcode = huis["postCode"]
+            print(postcode)
+            outData = KDgetDataByPostCode(postcode)["response"]["docs"]
+            output[postcode] = outData
 
-fl.WriteDataToJSON(outputpath+"kadasterData.json",output)
+    fl.WriteDataToJSON(outputpath+"kadasterData.json",output)
         
