@@ -11,9 +11,10 @@ def combineFundaAndKadaster(inputFile):
         fundaData = json.load(inFile)
         for entry in fundaData:
             kadasterDataRaw = Kadasterdata.KDgetDataByPostCode(entry["postCode"])
-            for entry in kadasterDataRaw:
-                if (entry["type"] == "adres"):
-                    print(entry)
-                    break
+            for postcode in kadasterDataRaw:
+                for huis in kadasterDataRaw[postcode]:
+                    if (huis["type"] == "adres"):
+                        print(huis)
+                        break
             
 combineFundaAndKadaster(inputpath+"fundaDataParsed.json")
