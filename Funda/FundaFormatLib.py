@@ -19,10 +19,10 @@ def parseFundaData(inputFile: str, outputFile: str):
         # outputDict.update({"huisNr":str(entry["titel"].split(" ")[-1])}) #Annoyingly there is no standard for listing this resulting in 44-45 or 45A-C
         
         #Lambdas & method formatters
-        outputDict.update({"oppervlakteInM2":handlePerceel((lambda x: getKeyOrNone(entry, "Oppervlakten en inhoud.Inhoud") if x is None else x)(getKeyOrNone(entry, "Oppervlakten en inhoud.Perceel")))})
-        outputDict.update({"bouwJaar":handleYears(getKeyOrNone(entry,"Bouw.Bouwjaar"))})
-        outputDict.update({"type":handleTypes((lambda x: getKeyOrNone(entry,"Bouw.Soort woonhuis") if x is None else x)(getKeyOrNone(entry,"Bouw.Soort appartement")))})
-        outputDict.update({"vraagPrijs":handleAskingPrice(getKeyOrNone(entry,"Overdracht.Vraagprijs"))})
+        outputDict.update({"oppervlakteInM2":handlePerceel((lambda x: fl.getKeyOrNone(entry, "Oppervlakten en inhoud.Inhoud") if x is None else x)(fl.getKeyOrNone(entry, "Oppervlakten en inhoud.Perceel")))})
+        outputDict.update({"bouwJaar":handleYears(fl.getKeyOrNone(entry,"Bouw.Bouwjaar"))})
+        outputDict.update({"type":handleTypes((lambda x: fl.getKeyOrNone(entry,"Bouw.Soort woonhuis") if x is None else x)(fl.getKeyOrNone(entry,"Bouw.Soort appartement")))})
+        outputDict.update({"vraagPrijs":handleAskingPrice(fl.getKeyOrNone(entry,"Overdracht.Vraagprijs"))})
 
         outputDict.update({"energieLabel":entry["Energie"]["Energielabel"].replace(" ","")})
         outputDict.update({"isolatieKenmerk":entry["Energie"]["Isolatie"]})
@@ -42,16 +42,6 @@ def removeStupidKeys(inputFile: str, outputFile: str): #Removes dynamically chan
     return input
 
 
-
-def getKeyOrNone(dictionary, key):
-    keys = key.split(".")
-    value = dictionary
-    for k in keys:
-        if isinstance(value, dict) and k in value:
-            value = value[k]
-        else:
-            return None
-    return value
     
 def handleYears(value):
     if value is not None:

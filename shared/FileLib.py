@@ -25,9 +25,6 @@ def EnsureFileExists(outfile):
     if not os.path.exists(outfile):
         open(outfile, 'w').close()
     
-def saveDictToJSON(output, data):
-    with open(output, 'w', encoding="utf8", newline="") as out:
-        json.dump(data, out, ensure_ascii=False)  
     
 def saveDictToCSV(output, data):
     with open(output, 'w', encoding="utf8", newline="") as out:
@@ -113,3 +110,13 @@ def findDiffrenceInStrings(str1, str2):
             print(f"Surrounding characters: {differing_chars}")
             return i
     return min_length
+
+def getKeyOrNone(dictionary, key):
+    keys = key.split(".")
+    value = dictionary
+    for k in keys:
+        if isinstance(value, dict) and k in value:
+            value = value[k]
+        else:
+            return None
+    return value
