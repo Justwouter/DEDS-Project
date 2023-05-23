@@ -15,7 +15,7 @@ def KDRemapID(data):
     return data
 
 
-def KDParseAndSaveDataFromFile(file=outputpath+"kadasterData.json"):
+def KDParseAndSaveDataFromFile(file=outputpath+"KadasterData.json"):
     outputDict = {}
     with open(file, "r") as inputFile:
         data = json.load(inputFile)
@@ -28,21 +28,17 @@ def KDParseAndSaveDataFromFile(file=outputpath+"kadasterData.json"):
                         formatDict[attrib] = fl.getKeyOrNone(huis, attrib)
                     formatList.append(formatDict)
                 outputDict[postCode] = KDRemapID(formatList)
-            print("Finished postCode " + postCode + " " +data.keys().index(postCode) + " out of " + len(data.keys()))
+            print("Finished postcode " + postCode + " " +str(list(data.keys()).index(postCode)+1) + " out of " + str(len(list(data.keys()))))
             fl.saveDictListToMongo("KadasterAdresDB", postCode, formatList)
     fl.WriteDataToJSON(outputpath+"kadasterDataPARSED.json", outputDict)
 
 
 def KDParseData(data):
-    outputDict = {}
-    for postCode in data:
-        formatList = []
-        for huis in data[postCode]:
-            if (huis["type"] == "adres"):
-                formatDict = {}
-                for attrib in attributes:
-                    formatDict[attrib] = fl.getKeyOrNone(huis, attrib)
-                formatList.append(formatDict)
-            outputDict[postCode] = KDRemapID(formatList)
-        print("Finished postCode " + postCode + " " +data.keys().index(postCode) + " out of " + len(data.keys()))
-    return outputDict
+    formatList = []
+       
+    if (data["type"] == "adres"):
+        formatDict = {}
+        for attrib in attributes:
+            formatDict[attrib] = fl.getKeyOrNone(data, attrib)
+        formatList.append(formatDict)
+    return formatDict
