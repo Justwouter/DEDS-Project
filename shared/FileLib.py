@@ -6,7 +6,11 @@ import sqlite3
 from pymongo import MongoClient
 
 
+def LoadDataFromJSON(infile):
+    with open(infile, encoding="utf8") as input:
+        return json.load(infile)
 
+        
 def WriteDataToJSON(outfile, data):
     EnsureFileExists(outfile)
     with open(outfile, 'w', encoding="utf8", newline="") as out:
