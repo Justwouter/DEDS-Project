@@ -112,6 +112,33 @@ def WriteDFToMySQL(dataframe, connection, table_name):
     # Commit the changes to the database
     connection.commit()
 
+def writeDFToMySQLv2(dataframe, connection, table_name):
+    # Create a cursor object
+    cursor = connection.cursor()
+
+    # Create the INSERT INTO statement
+    columns = ','.join(dataframe.columns)
+    values = ','.join(['%s'] * len(dataframe.columns))
+    insert_statement = f"INSERT INTO {table_name} ({columns}) VALUES ({values})"
+
+    # Convert DataFrame to a list of tuples
+    data = [tuple(row) for row in dataframe.values]
+
+    try:
+        # Execute the INSERT INTO statement
+        cursor.executemany(insert_statement, data)
+
+        # Commit the changes to the database
+        connection.commit()
+        print("Data inserted successfully into MySQL table.")
+
+    except mysql.connector.Error as error:
+        # Rollback the transaction in case of any error
+        connection.rollback()
+        print(f"Error inserting data into MySQL table: {error}")
+
+    # Close the cursor and connection
+    cursor.close()
 
 
 
@@ -154,7 +181,7 @@ def TransferData():
         "datum": current_date
     })
     #Push to DB
-    
+    writeDFToMySQLv2(prijsbepalingDF, mySQLConnection, "PrijsBepaling")
 
     
     # Update the oppervlakte & remove unneeded data
@@ -165,7 +192,7 @@ def TransferData():
     DBTDropAllOtherColumns(mySQLGebouwData.keys(),mySQLGebouwDataMerged)
     # print(mySQLGebouwDataMerged)
     # Push to DB
-    WriteDFToMySQL(mySQLGebouwDataMerged,mySQLConnection,"Gebouw")
+    # WriteDFToMySQL(mySQLGebouwDataMerged,mySQLConnection,"Gebouw")
     mySQLConnection.close()
 
     
