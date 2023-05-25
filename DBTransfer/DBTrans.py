@@ -5,22 +5,24 @@ import FileLib as fl
 import mysql.connector
 from mysql.connector import Error
 import pandas as pd
+from dotenv import load_dotenv
 
-
+load_dotenv()
 
 inputpath = os.path.dirname(__file__)+'/input/'
 outputpath = os.path.dirname(__file__)+'/output/'
 
 
+host = os.getenv("DBHost")
+mongoPort = os.getenv("mongoPort")
+mySQLPort = os.getenv("mySQLPort")
+user = os.getenv("DBUser")
+password = os.getenv("DBPass")
 
 #Mogo stuff
-host = "213.184.119.120"
-mongoPort = 27017
-mongoUser = "Wouter"
-mongoPass = "String1!"
 
 def DBTGetMongoConnection(database, collection):
-    client = MongoClient('mongodb://'+mongoUser+":"+mongoPass+"@"+host+":"+str(mongoPort))
+    client = MongoClient('mongodb://'+user+":"+password+"@"+host+":"+str(mongoPort))
     
     db = client[database]
     if collection not in db.list_collection_names():
@@ -35,18 +37,14 @@ def DBTGetAllItemsInMongoCollection(collection: collection.Collection):
 
 #MySQL Stuff
 
-MySQLUser = mongoUser
-MySQLPass = mongoPass
-MySQLPort = 3306
-
 def DBTGetMySQLConnection(database):
     try:
         connection = mysql.connector.connect(
             host=host,
-            port=MySQLPort,
+            port=mySQLPort,
             database = database,
-            user=MySQLUser,
-            password=MySQLPass
+            user=user,
+            password=password
         )
 
         if connection.is_connected():
