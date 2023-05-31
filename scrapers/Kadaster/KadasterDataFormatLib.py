@@ -42,3 +42,6 @@ def KDParseData(data):
             formatDict[attrib] = fl.getKeyOrNone(data, attrib)
         formatList.append(formatDict)
     return formatDict
+
+
+# KDParseAndSaveDataFromFile()

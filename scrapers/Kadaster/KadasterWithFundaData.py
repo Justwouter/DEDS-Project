@@ -12,15 +12,21 @@ def FKDRemapKeys(data):
     for entry in data:
         if "id" in entry:
             entry.update({"BAGid": entry.pop("id")})
+        if "postCode" in entry:
+            entry.pop("postCode")
     return data
 
+def FKDhandleWeirdFundaAdresses():
+    None#TODO WIP
 
-def combineFundaAndKadaster(inputFile):
+
+
+def FKDcombineFundaAndKadaster(inputFile):
     with open(inputFile, "r", encoding="utf-8") as inFile:
         fundaData = json.load(inFile)
         output = []
         for entry in fundaData:
-            kadasterDataRaw = KadasterData.KDgetDataByPostCode(entry["postCode"])
+            kadasterDataRaw = KadasterData.KDgetDataByPostCodeAndNumber(entry["postCode"])
             kadasterDataRaw = kadasterDataRaw["response"]["docs"]
             for huis in kadasterDataRaw:
                 if (huis["type"] == "adres"):
@@ -31,6 +37,6 @@ def combineFundaAndKadaster(inputFile):
                     break
     return FKDRemapKeys(output)
             
-data = combineFundaAndKadaster(inputpath+"fundaDataPARSED.json")
+data = FKDcombineFundaAndKadaster(inputpath+"fundaDataPARSED.json")
 fl.WriteDataToJSON(outputpath+"kadasterDataFUNDA.json",data)
-fl.saveDictListToMongo("FundaKadasterDB","fundaWithKadaster",data)
+# fl.saveDictListToMongo("FundaKadasterDB","fundaWithKadaster",data)

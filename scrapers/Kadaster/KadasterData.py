@@ -13,6 +13,14 @@ def KDgetDataByPostCode(postCode):
         return data
     return None
 
+def KDgetDataByPostCodeAndNumber(postCode, number):
+    url = "https://geodata.nationaalgeoregister.nl/locatieserver/v3/free?q="+postCode+"+"+str(number)+"&fl=*&fq=*:*&rows=10&start=0"
+    request = requests.get(url)
+    if(request.ok):
+        data = json.loads(request.content)
+        return data
+    return None
+
 
 # data = KDgetDataByPostCode("2498cg")["response"]["docs"]
 # fl.WriteDataToJSON(outputpath+"kadasterData.json",data)
@@ -26,4 +34,6 @@ def KDgetData():
             output[postcode] = outData
 
     fl.WriteDataToJSON(outputpath+"KadasterData.json",output)
-KDgetData()        
+
+KDgetData()                
+# fl.WriteDataToJSON(outputpath+"test.json", KDgetDataByPostCodeAndNumber("2498CG", 18))
