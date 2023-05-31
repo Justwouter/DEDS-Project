@@ -22,9 +22,8 @@ def KDgetData():
         inputData = json.load(inputFile)
         for huis in inputData:
             postcode = huis["postCode"]
-            print(postcode)
             outData = KDgetDataByPostCode(postcode)["response"]["docs"]
             output[postcode] = outData
 
-    fl.WriteDataToJSON(outputpath+"kadasterData.json",output)
-        
+    fl.WriteDataToJSON(outputpath+"KadasterData.json",output)
+KDgetData()        
